@@ -2,7 +2,7 @@
 /*
 Plugin Name: upc0ming
 Plugin URI: http://wordpress.org/#
-Description: list upcoming events via a publicly accessible google calendar
+Description: list upcoming events on a publicly accessible google calendar
 Author: Oliver C Dodd
 Version: 1.0.0
 Author URI: http://01001111.net
@@ -37,14 +37,86 @@ class upc0ming
 	private $user;
 	public $title;
 	private $divid;
+	private $css;
+	
+	const DEFAULT_CSS = '
+#upc0ming {
+	padding:5px 20px 5px 20px;
+}
+.upc0mingEvent {
+	font-family:Times New Roman;
+	min-height:80px;
+	height:auto !important;
+	height:80px;
+}
+.upc0mingEvent:after {
+	display: block;
+	height:0px;
+	clear:right;
+	content:" ";
+}
+.upc0mingEvent .calEntry {
+	position:relative;
+	float:left;
+	width:50px;
+	text-align:center;
+	border:solid black 2px;
+	margin:3px 3px 10px 10px;
+	pading-right:10px;
+}
+.upc0mingEvent .calEntry .calYear {
+	color:#FFFFFF;
+	background-color:#000000;
+	font-size:8px;
+	line-height:8px;
+	padding-left:7px;
+	letter-spacing:7px;
+}
+.upc0mingEvent .calEntry .calMonth {
+	color:#000000;
+	background-color:#b0b0b0;
+	font-size:11px;
+	line-height:12px;
+	letter-spacing:5px;
+	padding-left:5px;
+	font-weight:bold;
+}
+.upc0mingEvent .calEntry .calDay {
+	color:#000000;
+	background-color:#f0f0f0;
+	font-size:24px;
+	line-height:24px;
+	font-weight:bold;
+}
+.upc0mingEvent .calEntry .calTime {
+	color:#000000;
+	background-color:#ffffff;
+	font-size:9px;
+	line-height:10px;
+}
+.upc0mingEvent .event {
+	position:relative;
+	clear:right;
+	padding:10px 0 0 10px;
+ }
+.upc0mingEvent .event .eventWhat {
+	font-size:1.2em;
+	font-weight:bold;
+}
+.upc0mingEvent .event .eventWhere {
+	color:#404040;
+	font-size:1em;
+	font-style:italic;
+}';
 	
 	/*-CONSTRUCT----------------------------------------------------------*/
 	//public function __construct($u,$t="upc0ming",$d="")
-	public function upc0ming($u,$t="upc0ming",$d="")
+	public function upc0ming($u,$t="upc0ming",$d="",$css="")
 	{
 		$this->user	= $u;
-		$this->title	= $s;
+		$this->title	= $t;
 		$this->divid	= $d;
+		$this->css	= $css;
 	}
 	
 	private function url()
@@ -82,16 +154,16 @@ class upc0ming
 			$when = $event->getElementsByTagName('when')->item(0);
 			$start = $when->getAttribute('startTime');
 			$events[] = array(
-				'who'		=> self::tagValue($author,'name'),
-				'what'		=> self::tagValue($event,'title'),
-				'info'		=> self::tagValue($event,'content'),
-				'where'		=> self::attributeValue($event,
+				'who'		=> $this->tagValue($author,'name'),
+				'what'		=> $this->tagValue($event,'title'),
+				'info'		=> $this->tagValue($event,'content'),
+				'where'		=> $this->attributeValue($event,
 							'where','valueString'),
 				'when'		=> $start,
 				'start'		=> $start,
 				'end'		=> $when->getAttribute('endTime'),
 				'timestamp'	=> strtotime($start),
-				'link'		=> self::attributeValue($event,
+				'link'		=> $this->attributeValue($event,
 							'link','href',
 							array('rel'=>'alternate'))
 			);
@@ -101,7 +173,7 @@ class upc0ming
 	}
 	
 	/*-XML PARSING SPECIFICS----------------------------------------------*/
-	public static function tagValue($node,$tag,$requiredAttributes=array(),$valueIfNoChild=false)
+	public function tagValue($node,$tag,$requiredAttributes=array(),$valueIfNoChild=false)
 	{
 		if (!$requiredAttributes) {
 			$children = $node->getElementsByTagName($tag);
@@ -125,7 +197,7 @@ class upc0ming
 		return $element ? $element->nodeValue : "";
 	}
 	
-	private static function attributeValue($node,$tag,$attribute,$requiredAttributes=array())
+	private function attributeValue($node,$tag,$attribute,$requiredAttributes=array())
 	{
 		if (!$requiredAttributes) {
 			$children = $node->getElementsByTagName($tag);
@@ -156,12 +228,13 @@ class upc0ming
 			? $options = array(
 				'user'		=> "",
 				'title'		=> "upc0ming",
-				'divid'		=> "")
+				'divid'		=> "",
+				'css'		=> self::DEFAULT_CSS)
 			: $options;
 	}
 	
 	/*-MAKE OPTIONS-------------------------------------------------------*/
-	public static function makeOptions($a,$s="")
+	public function makeOptions($a,$s="")
 	{
 		$options = "";
 		foreach ($a as $o) {
@@ -172,10 +245,10 @@ class upc0ming
 	}
 	
 	/*-OUTPUT EVENTS------------------------------------------------------*/
-	public static function outputEvents()
+	public function outputEvents()
 	{
 		$events = $this->getEvents();
-		$html = "";
+		$html = "<style type='text/css'>$this->css</style>";
 		foreach ($events as $event) {
 			$t = $event['timestamp'];
 			$y = date('Y',$t);
@@ -185,11 +258,11 @@ class upc0ming
 			
 			$html .= "
 			<div class='upc0mingEvent'>
-				<div class='upc0mingEntry'>
-					<div class='upc0mingYear'>$y</div>
-					<div class='upc0mingMonth'>$m</div>
-					<div class='upc0mingDay'>$d</div>
-					<div class='upc0mingTime'>$ts</div>
+				<div class='calEntry'>
+					<div class='calYear'>$y</div>
+					<div class='calMonth'>$m</div>
+					<div class='calDay'>$d</div>
+					<div class='calTime'>$ts</div>
 				</div>
 				<div class='event'>
 					<div class='eventWhat'>{$event['what']}</div>
@@ -197,6 +270,7 @@ class upc0ming
 				</div>
 			</div>";
 		}
+		return $html;
 	}
 }
 /*-OPTIONS--------------------------------------------------------------------*/
@@ -205,9 +279,10 @@ function widget_upc0ming_options()
 	$options = upc0ming::getOptions();
 	if($_POST['upc0ming-submit'])
 	{
-		$options = array(	'user'		=> $_POST['upc0ming-user'],
-					'title'		=> $_POST['upc0ming-title'],
-					'divid'		=> $_POST['upc0ming-divid']);
+		$options = array(	'user'	=> $_POST['upc0ming-user'],
+					'title'	=> $_POST['upc0ming-title'],
+					'divid'	=> $_POST['upc0ming-divid'],
+					'css'	=> $_POST['upc0ming-css']);
 		update_option('upc0ming',$options);
 	}
 	?>
@@ -229,6 +304,14 @@ function widget_upc0ming_options()
 			id="upc0ming-divid"
 			value="<?php echo $options['divid']; ?>"  />
 	</p>
+	<p>	CSS (blank if you want to add it to your theme css, defaults provided):
+		<br />
+		<textarea
+			name="upc0ming-css"
+			id="upc0ming-css"
+			cols="40"
+			rows="20"><?php echo $options['css']; ?></textarea>
+	</p>
 	<input type="hidden" id="upc0ming-submit" name="upc0ming-submit" value="1" />
 	<?php
 }
@@ -242,7 +325,8 @@ function widget_upc0ming_init()
 		$options = upc0ming::getOptions();
 		$u = new upc0ming(	$options['user'],
 					$options['title'],
-					$options['divid']);
+					$options['divid'],
+					$options['css']);
 		echo "	$before_widget
 			$before_title $u->title $after_title
 				{$u->outputEvents()}
