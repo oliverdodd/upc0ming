@@ -36,8 +36,6 @@ class upc0ming
 	/*-VARIABLES----------------------------------------------------------*/
 	private $user;
 	public $title;
-	private $limit;
-	private $linkTo;
 	private $divid;
 	private $css;
 	
@@ -113,10 +111,12 @@ class upc0ming
 	
 	/*-CONSTRUCT----------------------------------------------------------*/
 	//public function __construct($u,$t="upc0ming",$d="")
-	public function upc0ming($options)
+	public function upc0ming($u,$t="upc0ming",$d="",$css="")
 	{
-		foreach($options as $k => $v)
-			@($this->$k = $v);
+		$this->user	= $u;
+		$this->title	= $t;
+		$this->divid	= $d;
+		$this->css	= $css;
 	}
 	
 	private function url()
@@ -149,10 +149,7 @@ class upc0ming
 		
 		$events = array();
 		$entries = $doc->getElementsByTagName('entry');
-		$i = 0;
 		foreach ($entries as $event) {
-			if ($this->limit && ++$i > $this->limit)
-				break;
 			$author = $event->getElementsByTagName('author')->item(0);
 			$when = $event->getElementsByTagName('when')->item(0);
 			$start = $when->getAttribute('startTime');
@@ -170,6 +167,7 @@ class upc0ming
 							'link','href',
 							array('rel'=>'alternate'))
 			);
+			
 		}
 		return $events;
 	}
@@ -230,8 +228,6 @@ class upc0ming
 			? $options = array(
 				'user'		=> "",
 				'title'		=> "upc0ming",
-				'limit'		=> "",
-				'linkTo'	=> false,
 				'divid'		=> "",
 				'css'		=> self::DEFAULT_CSS)
 			: $options;
@@ -260,15 +256,6 @@ class upc0ming
 			$d = date('j',$t);
 			$ts = date('g:i a',$t);
 			
-			$eventName = "
-			<div class='event'>
-				<div class='eventWhat'>{$event['what']}</div>
-				<div class='eventWhere'>{$event['where']}</div>
-			</div>";
-			$eventName = $this->linkTo
-					? "<a href='$link'>$eventName</a>"
-					: $eventName;
-			
 			$html .= "
 			<div class='upc0mingEvent'>
 				<div class='calEntry'>
@@ -277,7 +264,10 @@ class upc0ming
 					<div class='calDay'>$d</div>
 					<div class='calTime'>$ts</div>
 				</div>
-				$eventName
+				<div class='event'>
+					<div class='eventWhat'>{$event['what']}</div>
+					<div class='eventWhere'>{$event['where']}</div>
+				</div>
 			</div>";
 		}
 		return $html;
@@ -291,8 +281,6 @@ function widget_upc0ming_options()
 	{
 		$options = array(	'user'	=> $_POST['upc0ming-user'],
 					'title'	=> $_POST['upc0ming-title'],
-					'linkTo'=> $_POST['upc0ming-linkTo'],
-					'limit'	=> $_POST['upc0ming-limit'],
 					'divid'	=> $_POST['upc0ming-divid'],
 					'css'	=> $_POST['upc0ming-css']);
 		update_option('upc0ming',$options);
@@ -309,19 +297,6 @@ function widget_upc0ming_options()
 			name="upc0ming-title"
 			id="upc0ming-title"
 			value="<?php echo $options['title']; ?>"  />
-	</p>
-	<p>	Link To Event?
-		<input	type="checkbox"
-			name="upc0ming-linkTo"
-			id="upc0ming-linkTo"
-			<?php echo $options['linkTo'] ? 'checked="checked"' : ""; ?>
-			value="1"  />
-	</p>
-	<p>	Limit Events (blank for no limit):
-		<input	type="text"
-			name="upc0ming-limit"
-			id="upc0ming-limit"
-			value="<?php echo $options['limit']; ?>"  />
 	</p>
 	<p>	Wrapper Div ID (blank for no div):
 		<input	type="text"
@@ -348,7 +323,10 @@ function widget_upc0ming_init()
 	{
 		extract($args);
 		$options = upc0ming::getOptions();
-		$u = new upc0ming($options);
+		$u = new upc0ming(	$options['user'],
+					$options['title'],
+					$options['divid'],
+					$options['css']);
 		echo "	$before_widget
 			$before_title $u->title $after_title
 				{$u->outputEvents()}
