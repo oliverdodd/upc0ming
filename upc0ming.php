@@ -4,7 +4,7 @@ Plugin Name: upc0ming
 Plugin URI: http://wordpress.org/#
 Description: list upcoming events on a publicly accessible google calendar
 Author: Oliver C Dodd
-Version: 1.1.0
+Version: 1.1.1
 Author URI: http://01001111.net
   
   Copyright (c) 2009 Oliver C Dodd - http://01001111.net

@@ -119,10 +119,12 @@ class upc0ming
 			@($this->$k = $v);
 	}
 	
-	private function url()
+	private function url($futureOnly)
 	{
-		return "http://www.google.com/calendar/feeds/$this->user".
-			"/public/full/?futureevents=true";
+		return "http://www.google.com/calendar/feeds/".
+			urlencode($this->user).
+			"/public/full/".
+			($futureOnly ? "?futureevents=true" : "");
 	}
 	
 	private function get($url)
@@ -143,7 +145,7 @@ class upc0ming
 	/*-EVENTS-------------------------------------------------------------*/
 	public function getEvents($futureOnly=true)
 	{
-		$xml = $this->get($this->url());
+		$xml = $this->get($this->url($futureOnly));
 		$doc = new DOMDocument();
 		if (!$xml||!$doc->loadXML($xml)) return array();
 		
@@ -151,12 +153,13 @@ class upc0ming
 		$entries = $doc->getElementsByTagName('entry');
 		$i = 0;
 		foreach ($entries as $event) {
-			if ($this->limit && ++$i > $this->limit)
+			if (++$i && $this->limit > $this->limit)
 				break;
 			$author = $event->getElementsByTagName('author')->item(0);
 			$when = $event->getElementsByTagName('when')->item(0);
 			$start = $when->getAttribute('startTime');
-			$events[] = array(
+			$timestamp = strtotime($start);
+			$events["$timestamp.$i"] = array(
 				'who'		=> $this->tagValue($author,'name'),
 				'what'		=> $this->tagValue($event,'title'),
 				'info'		=> $this->tagValue($event,'content'),
@@ -171,6 +174,7 @@ class upc0ming
 							array('rel'=>'alternate'))
 			);
 		}
+		ksort($events);
 		return $events;
 	}
 	
@@ -266,8 +270,8 @@ class upc0ming
 				<div class='eventWhere'>{$event['where']}</div>
 			</div>";
 			$eventName = $this->linkTo
-					? "<a href='{$event['link']}'>$eventName</a>"
-					: $eventName;
+				? "<a href='{$event['link']}' target='_blank'>$eventName</a>"
+				: $eventName;
 			
 			$html .= "
 			<div class='upc0mingEvent'>
