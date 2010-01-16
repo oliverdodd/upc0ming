@@ -9,7 +9,7 @@ Display the upcoming events on a publicly accessible google calendar.
 
 == Description ==
 
-The upc0ming widget/plugin to show all the upcoming events booked on a Google Calendar that is publicly readable.  This doesn't need to be your default Google Calendar, you can create new calendars in which you can share only a subset of your information.
+The upc0ming widget/plugin shows all, or a limited number of, the upcoming events booked on a Google Calendar that is publicly readable.  This doesn't need to be your default Google Calendar, you can create new calendars in which you can share only a subset of your information.
 
 == Installation ==
 
