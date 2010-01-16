@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: upc0ming
-Plugin URI: http://wordpress.org/#
+Plugin URI: http://wordpress.org/extend/plugins/upc0ming/
 Description: list upcoming events on a publicly accessible google calendar
 Author: Oliver C Dodd
 Version: 1.1.1

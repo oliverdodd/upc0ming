@@ -1,5 +1,6 @@
 === upc0ming ===
 Contributors: 01001111
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=11216463
 Tags: widget, calendar, google, events, social
 Requires at least: 2.0.2
 Tested up to: 2.7
@@ -29,6 +30,8 @@ The configuration parameters are:
 * Title: The title of this section.
 * Wrapper Div ID: The id for the widget's wrapper div for your CSS styling convenience.  Leave blank to omit the div wrapper entirely.
 * CSS: Inline CSS for convenience.  Default CSS can be found in the plugin code or in the FAQ.
+* Link To Event?: Link the event to its detail page in Google Calendar?
+* Limit Events?: Limit the events to a particular number? (blank for no limit)
 
 
 == Frequently Asked Questions ==
@@ -127,3 +130,23 @@ It's embedded in the code or you can copy/paste from below:
 == Screenshots ==
 
 None at the moment.
+
+== Changelog ==
+
+= 1.1.1 =
+* Fixed the event ordering
+
+= 1.1.0 =
+* Added the ability to limit the number of returned events
+* Events can now be linked to their Google Calendar entries
+
+= 1.0.0 =
+* First release.
+
+== Upgrade Notice ==
+
+= 1.1.1 =
+Fixed a bug that would cause the events to appear out of order.
+
+= 1.1.0 =
+Added new features.
